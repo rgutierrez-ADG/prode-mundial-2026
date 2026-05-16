@@ -79,15 +79,16 @@ const FLAG_MAP = {
   "Panamá":          "pa",
 };
 
-// Componente bandera: imagen real via flagcdn.com
+// Componente bandera: imagen real via flagsapi.com
 function Flag({ name, size = 28 }) {
   const code = FLAG_MAP[name];
   if (!code) return <span style={{fontSize: size * 0.7, lineHeight: 1}}>⚽</span>;
+  // Mapear códigos especiales (Escocia, Inglaterra) a equivalentes que sí soporta el CDN
+  const isoCode = code === "gb-sct" ? "GB" : code === "gb-eng" ? "GB" : code.toUpperCase();
   const h = Math.round(size * 0.67);
   return (
     <img
-      src={`https://flagcdn.com/${size}x${h}/${code}.png`}
-      srcSet={`https://flagcdn.com/${size*2}x${h*2}/${code}.png 2x`}
+      src={`https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/${code}.svg`}
       width={size}
       height={h}
       alt={name}
@@ -98,6 +99,7 @@ function Flag({ name, size = 28 }) {
         boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
         border: "1px solid rgba(255,255,255,0.1)",
       }}
+      onError={(e) => { e.target.style.display = 'none'; }}
     />
   );
 }
