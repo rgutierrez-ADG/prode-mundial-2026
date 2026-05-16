@@ -328,6 +328,167 @@ function buildWAMsg(jornadaLabel, lb) {
   m+=`${"━".repeat(20)}\n5pts=exacto | 3pts=ganador`;
   return m;
 }
+
+// Genera imagen PNG de la tabla de posiciones (podio + lista)
+async function generateLeaderboardImage(jornadaLabel, lb) {
+  const W = 800, podioH = 380, rowH = 56, headerH = 140;
+  const restRows = Math.max(0, lb.length - 3);
+  const H = headerH + podioH + (restRows * rowH) + 80;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  // Fondo degradado azul oscuro → dorado tenue
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#0c1526");
+  bg.addColorStop(0.5, "#1a3260");
+  bg.addColorStop(1, "#0c1526");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Header
+  ctx.fillStyle = "#f5c518";
+  ctx.font = "bold 42px Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("PRODE MUNDIAL 2026", W/2, 55);
+
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 22px Arial, sans-serif";
+  ctx.fillText("🏆 " + jornadaLabel, W/2, 92);
+
+  ctx.fillStyle = "#9aa8c0";
+  ctx.font = "16px Arial, sans-serif";
+  ctx.fillText(new Date().toLocaleDateString("es-AR"), W/2, 118);
+
+  // Línea separadora
+  ctx.strokeStyle = "#f5c518";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(60, headerH);
+  ctx.lineTo(W-60, headerH);
+  ctx.stroke();
+
+  // PODIO (top 3)
+  const top3 = lb.slice(0, 3);
+  if (top3.length > 0) {
+    const podioY = headerH + 40;
+    const positions = [
+      { x: W/2 - 200, h: 180, color: "#c0c0c0", medal: "🥈", rank: 2 }, // izq - 2do
+      { x: W/2,       h: 240, color: "#FFD700", medal: "🥇", rank: 1 }, // centro - 1ro
+      { x: W/2 + 200, h: 140, color: "#cd7f32", medal: "🥉", rank: 3 }, // der - 3ro
+    ];
+    const order = [1, 0, 2]; // 1ro al medio
+    order.forEach(idx => {
+      const pos = positions[idx];
+      const player = top3[pos.rank - 1];
+      if (!player) return;
+      const baseY = podioY + podioH - 50;
+      const blockTop = baseY - pos.h;
+      // Bloque del podio
+      ctx.fillStyle = pos.color;
+      ctx.globalAlpha = 0.9;
+      ctx.fillRect(pos.x - 75, blockTop, 150, pos.h);
+      ctx.globalAlpha = 1;
+      // Borde brillante arriba
+      ctx.fillStyle = "rgba(255,255,255,0.3)";
+      ctx.fillRect(pos.x - 75, blockTop, 150, 4);
+      // Medalla
+      ctx.font = "44px Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#000";
+      ctx.fillText(pos.medal, pos.x, blockTop - 30);
+      // Nombre
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 22px Arial, sans-serif";
+      ctx.fillText(player.name, pos.x, blockTop + 35);
+      // Puntos
+      ctx.fillStyle = "#0c1526";
+      ctx.font = "bold 36px Arial, sans-serif";
+      ctx.fillText(`${player.pts}`, pos.x, blockTop + 80);
+      ctx.fillStyle = "#0c1526";
+      ctx.font = "bold 14px Arial, sans-serif";
+      ctx.fillText("PTS", pos.x, blockTop + 100);
+      // Stats
+      ctx.fillStyle = "rgba(0,0,0,0.7)";
+      ctx.font = "13px Arial, sans-serif";
+      ctx.fillText(`⭐${player.exact} ✓${player.win}`, pos.x, blockTop + pos.h - 20);
+    });
+  }
+
+  // Resto de la tabla (4to en adelante)
+  const restStart = headerH + podioH + 30;
+  lb.slice(3).forEach((player, i) => {
+    const y = restStart + (i * rowH);
+    const rank = i + 4;
+    // Fondo de fila (zebra)
+    if (i % 2 === 0) {
+      ctx.fillStyle = "rgba(255,255,255,0.04)";
+      ctx.fillRect(60, y, W - 120, rowH - 6);
+    }
+    // Posición
+    ctx.fillStyle = "#9aa8c0";
+    ctx.font = "bold 24px Arial, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(`${rank}°`, 80, y + 36);
+    // Nombre
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 22px Arial, sans-serif";
+    ctx.fillText(player.name, 140, y + 36);
+    // Stats
+    ctx.fillStyle = "#9aa8c0";
+    ctx.font = "14px Arial, sans-serif";
+    ctx.fillText(`⭐ ${player.exact} exactos  ✓ ${player.win} ganadores`, 140, y + 14 + 36);
+    // Puntos
+    ctx.fillStyle = "#f5c518";
+    ctx.font = "bold 32px Arial, sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(`${player.pts}`, W - 100, y + 36);
+    ctx.fillStyle = "#9aa8c0";
+    ctx.font = "12px Arial, sans-serif";
+    ctx.fillText("PTS", W - 80, y + 36);
+  });
+
+  // Footer
+  ctx.fillStyle = "#9aa8c0";
+  ctx.font = "13px Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("5 PTS = resultado exacto  •  3 PTS = ganador correcto", W/2, H - 30);
+
+  return new Promise(resolve => {
+    canvas.toBlob(blob => resolve(blob), "image/png");
+  });
+}
+
+// Comparte la imagen via Web Share API (nativo en mobile)
+async function shareLeaderboard(jornadaLabel, lb) {
+  try {
+    const blob = await generateLeaderboardImage(jornadaLabel, lb);
+    const file = new File([blob], `prode-${jornadaLabel.replace(/\s/g,"-")}.png`, { type: "image/png" });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: "Tabla Prode Mundial 2026",
+        text: `🏆 Resultados ${jornadaLabel}`,
+      });
+      return { shared: true };
+    } else {
+      // Fallback: descarga la imagen
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `prode-${jornadaLabel.replace(/\s/g,"-")}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return { downloaded: true };
+    }
+  } catch (err) {
+    console.error("Share error:", err);
+    return { error: err.message };
+  }
+}
 function isJornadaComplete(jornada, results) {
   if (!jornada?.matchIds?.length) return false;
   return jornada.matchIds.every(id => results?.[id] !== undefined);
@@ -673,13 +834,21 @@ export default function App() {
       if (sentJornadas.includes(jornada.label)) continue;
       if (isJornadaComplete(jornada, newResults)) {
         const {apikey, phone} = state.waBotConfig || {};
+        const lb2 = buildLeaderboard(state.employees, state.predictions, newResults, state.knockoutTeams);
+
+        // Si no hay API configurada, ofrecer compartir imagen
         if (!apikey || !phone) {
-          showToast(`🎉 ${jornada.label} completa! Configurá WhatsApp para envío automático.`, true);
+          showToast(`🎉 ${jornada.label} completa! Generando imagen...`);
+          const r = await shareLeaderboard(jornada.label, lb2);
+          if (r.shared || r.downloaded) {
+            showToast(`✅ Tabla compartida: ${jornada.label}!`);
+          }
           return;
         }
+
+        // Si hay API, enviar texto automático
         showToast(`🎉 ${jornada.label} completa! Enviando WhatsApp...`);
         try {
-          const lb2 = buildLeaderboard(state.employees, state.predictions, newResults, state.knockoutTeams);
           const msg = buildWAMsg(jornada.label, lb2);
           const encoded = encodeURIComponent(msg);
           const url = `https://api.callmebot.com/whatsapp.php?phone=${phone}&text=${encoded}&apikey=${apikey}`;
@@ -689,10 +858,12 @@ export default function App() {
             setState_(prev => ({...prev, sentJornadas:[...sentJornadas, jornada.label]}));
             showToast(`✅ WhatsApp enviado: ${jornada.label}!`);
           } else {
-            showToast("⚠️ WhatsApp falló. Enviá manualmente desde la pestaña.", true);
+            showToast("⚠️ WhatsApp falló. Generando imagen como alternativa...", true);
+            await shareLeaderboard(jornada.label, lb2);
           }
         } catch {
-          showToast("⚠️ Error de red al enviar WhatsApp.", true);
+          showToast("⚠️ Error de red. Generando imagen como alternativa...", true);
+          await shareLeaderboard(jornada.label, lb2);
         }
         break;
       }
@@ -1312,10 +1483,33 @@ function WATab({ state, lb, onConfig, onSend }) {
         <button className="bgo" onClick={()=>onConfig(apikey,phone)}>Guardar configuración</button>
       </div>
 
-      {/* Manual send override */}
+      {/* Share image (NUEVO - método recomendado) */}
+      <div className="wa" style={{borderColor:"var(--green)"}}>
+        <div className="wat">📸 Compartir tabla como imagen (recomendado)</div>
+        <div className="was">
+          Genera una imagen con el podio y la tabla completa. Tocá el botón → elegí el grupo de WhatsApp → enviar. <strong>No necesita configuración ni API key.</strong>
+        </div>
+        <div className="warow">
+          <select className="wasel" value={jorn} onChange={e=>setJorn(e.target.value)}>
+            {JORNADAS.map(j=>(
+              <option key={j.label} value={j.label}>{j.label}</option>
+            ))}
+          </select>
+          <button className="bwa" style={{background:"var(--green)",color:"#fff"}}
+            onClick={async()=>{
+              const r = await shareLeaderboard(jorn, lb);
+              if (r.error) alert("Error: " + r.error);
+              else if (r.downloaded) alert("📥 Imagen descargada. Compartila al grupo desde tu galería.");
+            }}>
+            📸 Generar y compartir
+          </button>
+        </div>
+      </div>
+
+      {/* Envío via API (alternativo) */}
       <div className="wa">
-        <div className="wat">📤 Envío manual (si fuera necesario)</div>
-        <div className="was">Si el envío automático falló o querés reenviar, podés hacerlo manualmente acá.</div>
+        <div className="wat">📤 Envío automático por API (alternativo)</div>
+        <div className="was">Solo si configuraste CallMeBot. Envía texto (no imagen).</div>
         <div className="warow">
           <select className="wasel" value={jorn} onChange={e=>setJorn(e.target.value)}>
             {JORNADAS.map(j=>(
@@ -1325,10 +1519,10 @@ function WATab({ state, lb, onConfig, onSend }) {
             ))}
           </select>
           <button className="bwa" disabled={sending||!cfgOk} onClick={handle}>
-            {sending?"Enviando...":"📲 Enviar al grupo"}
+            {sending?"Enviando...":"📲 Enviar texto"}
           </button>
         </div>
-        {!cfgOk && <div style={{marginTop:8,fontSize:12,color:"var(--red)"}}>⚠️ Configurá API key y teléfono primero</div>}
+        {!cfgOk && <div style={{marginTop:8,fontSize:12,color:"var(--muted)"}}>ℹ️ Para usar esto, configurá API key y teléfono arriba.</div>}
       </div>
 
       {/* Preview */}
