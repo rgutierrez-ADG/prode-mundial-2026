@@ -757,6 +757,46 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-
 // ============================================================
 // APP ROOT
 // ============================================================
+
+// ── AUTO-PROPAGACIÓN DE GANADORES ───────────────────────────
+function getWinnerName(matchId, home, away, results) {
+  const r = results[matchId];
+  if (!r) return null;
+  if (r.home > r.away) return home;
+  if (r.away > r.home) return away;
+  return null; // empate → no propagar automáticamente
+}
+
+// Mapa: partido → slot del ganador en la siguiente ronda
+const BRACKET_MAP = {
+  // R32 → QF (dieciseisavos)
+  "R32_1":  "W_R32_1",  "R32_2":  "W_R32_2",  "R32_3":  "W_R32_3",  "R32_4":  "W_R32_4",
+  "R32_5":  "W_R32_5",  "R32_6":  "W_R32_6",  "R32_7":  "W_R32_7",  "R32_8":  "W_R32_8",
+  "R32_9":  "W_R32_9",  "R32_10": "W_R32_10", "R32_11": "W_R32_11", "R32_12": "W_R32_12",
+  "R32_13": "W_R32_13", "R32_14": "W_R32_14", "R32_15": "W_R32_15", "R32_16": "W_R32_16",
+  // QF → SF (cuartos)
+  "QF1": "W_QF1", "QF2": "W_QF2", "QF3": "W_QF3", "QF4": "W_QF4",
+  "QF5": "W_QF5", "QF6": "W_QF6", "QF7": "W_QF7", "QF8": "W_QF8",
+  // SF → FINALS (semis)
+  "SF1": "W_SF1", "SF2": "W_SF2", "SF3": "W_SF3", "SF4": "W_SF4",
+  // FINALS → nada (final)
+  "SF_A": "W_SF_A", "SF_B": "W_SF_B",
+};
+
+function getMatchTeams(matchId, knockoutTeams) {
+  const resolve = s => knockoutTeams?.[s] || s;
+  const allR32 = R32;
+  const allQF  = QF;
+  const allSF  = SF;
+  const allFIN = FINALS;
+  const all = [...allR32, ...allQF, ...allSF, ...allFIN];
+  const m = all.find(x => x.id === matchId);
+  if (!m) return { home: null, away: null };
+  // R32 tiene home/away directo
+  if (m.home && !m.slotA) return { home: m.home, away: m.away };
+  return { home: resolve(m.slotA), away: resolve(m.slotB) };
+}
+
 export default function App() {
   const [user,    setUser]    = useState(null);
   const [isAdmin, setAdmin]   = useState(false);
@@ -825,9 +865,29 @@ export default function App() {
     if (isNaN(hv)||isNaN(av)) { showToast("Marcador inválido",true); return; }
     const newResults = {...state.results,[matchId]:{home:hv,away:av}};
     const ns = {...state, results: newResults};
+
+    // Auto-propagar ganador al siguiente slot del bracket
+    const { home: teamHome, away: teamAway } = getMatchTeams(matchId, state.knockoutTeams);
+    const winnerSlot = BRACKET_MAP[matchId];
+    let newKnockoutTeams = {...(state.knockoutTeams||{})};
+
+    if (winnerSlot && teamHome && teamAway && teamHome !== teamAway) {
+      let winner = null;
+      if (hv > av) winner = teamHome;
+      else if (av > hv) winner = teamAway;
+      if (winner) {
+        newKnockoutTeams[winnerSlot] = winner;
+        ns.knockoutTeams = newKnockoutTeams;
+      }
+    }
+
     setState_(ns);
     try {
       await apiPost("/result", { matchId, home: hv, away: av }, true);
+      // Guardar knockoutTeams actualizado si hubo propagación
+      if (winnerSlot && newKnockoutTeams[winnerSlot]) {
+        await apiPost("/knockout", { slot: winnerSlot, team: newKnockoutTeams[winnerSlot] }, true);
+      }
       showToast("✅ Resultado guardado");
     } catch {
       showToast("Error al guardar resultado",true);
@@ -841,19 +901,13 @@ export default function App() {
       if (sentJornadas.includes(jornada.label)) continue;
       if (isJornadaComplete(jornada, newResults)) {
         const {apikey, phone} = state.waBotConfig || {};
-        const lb2 = buildLeaderboard(state.employees, state.predictions, newResults, state.knockoutTeams);
-
-        // Si no hay API configurada, ofrecer compartir imagen
+        const lb2 = buildLeaderboard(state.employees, state.predictions, newResults, newKnockoutTeams);
         if (!apikey || !phone) {
           showToast(`🎉 ${jornada.label} completa! Generando imagen...`);
           const r = await shareLeaderboard(jornada.label, lb2);
-          if (r.shared || r.downloaded) {
-            showToast(`✅ Tabla compartida: ${jornada.label}!`);
-          }
+          if (r.shared || r.downloaded) showToast(`✅ Tabla compartida: ${jornada.label}!`);
           return;
         }
-
-        // Si hay API, enviar texto automático
         showToast(`🎉 ${jornada.label} completa! Enviando WhatsApp...`);
         try {
           const msg = buildWAMsg(jornada.label, lb2);
@@ -865,11 +919,11 @@ export default function App() {
             setState_(prev => ({...prev, sentJornadas:[...sentJornadas, jornada.label]}));
             showToast(`✅ WhatsApp enviado: ${jornada.label}!`);
           } else {
-            showToast("⚠️ WhatsApp falló. Generando imagen como alternativa...", true);
+            showToast("⚠️ WhatsApp falló. Generando imagen...", true);
             await shareLeaderboard(jornada.label, lb2);
           }
         } catch {
-          showToast("⚠️ Error de red. Generando imagen como alternativa...", true);
+          showToast("⚠️ Error de red. Generando imagen...", true);
           await shareLeaderboard(jornada.label, lb2);
         }
         break;
