@@ -161,7 +161,7 @@ const GROUPS_DATA = {
     { id:"F3", date:"2026-06-20T14:00", home:"Países Bajos", away:"Suecia",       hf:"🇳🇱", af:"🇸🇪" },
     { id:"F4", date:"2026-06-21T01:00", home:"Túnez",        away:"Japón",        hf:"🇹🇳", af:"🇯🇵" },
     { id:"F5", date:"2026-06-25T20:00", home:"Países Bajos", away:"Túnez",        hf:"🇳🇱", af:"🇹🇳" },
-{ id:"F6", date:"2026-06-25T20:00", home:"Japón",        away:"Suecia",       hf:"🇯🇵", af:"🇸🇪" },
+    { id:"F6", date:"2026-06-25T20:00", home:"Japón",        away:"Suecia",       hf:"🇯🇵", af:"🇸🇪" },
   ]},
   // GRUPO G: Bélgica, Egipto, Irán, Nueva Zelanda
   G: { matches: [
@@ -221,43 +221,50 @@ const GROUPS_DATA = {
 
 // Knockout bracket — slots reference group positions (1A=1° Grupo A, 2B=2° Grupo B, etc.)
 const R32 = [
-  { id:"R32_1",  date:"2026-07-04T01:00", slotA:"1A", slotB:"2C", label:"Partido 1" },
-  { id:"R32_2",  date:"2026-07-04T17:00", slotA:"1C", slotB:"2A", label:"Partido 2" },
-  { id:"R32_3",  date:"2026-07-05T01:00", slotA:"1B", slotB:"2D", label:"Partido 3" },
-  { id:"R32_4",  date:"2026-07-05T17:00", slotA:"1D", slotB:"2B", label:"Partido 4" },
-  { id:"R32_5",  date:"2026-07-06T01:00", slotA:"1E", slotB:"2G", label:"Partido 5" },
-  { id:"R32_6",  date:"2026-07-06T17:00", slotA:"1G", slotB:"2E", label:"Partido 6" },
-  { id:"R32_7",  date:"2026-07-07T01:00", slotA:"1F", slotB:"2H", label:"Partido 7" },
-  { id:"R32_8",  date:"2026-07-07T17:00", slotA:"1H", slotB:"2F", label:"Partido 8" },
-  { id:"R32_9",  date:"2026-07-08T01:00", slotA:"1I", slotB:"2K", label:"Partido 9" },
-  { id:"R32_10", date:"2026-07-08T17:00", slotA:"1K", slotB:"2I", label:"Partido 10" },
-  { id:"R32_11", date:"2026-07-09T01:00", slotA:"1J", slotB:"2L", label:"Partido 11" },
-  { id:"R32_12", date:"2026-07-09T17:00", slotA:"1L", slotB:"2J", label:"Partido 12" },
-  { id:"R32_13", date:"2026-07-10T01:00", slotA:"3rd_1", slotB:"3rd_2", label:"3ros (1)" },
-  { id:"R32_14", date:"2026-07-10T17:00", slotA:"3rd_3", slotB:"3rd_4", label:"3ros (2)" },
-  { id:"R32_15", date:"2026-07-11T01:00", slotA:"3rd_5", slotB:"3rd_6", label:"3ros (3)" },
-  { id:"R32_16", date:"2026-07-11T17:00", slotA:"3rd_7", slotB:"3rd_8", label:"3ros (4)" },
+  // ── LADO IZQUIERDO ──────────────────────────────────────────
+  { id:"R32_1",  date:"2026-06-28T18:00", home:"Sudáfrica",       away:"Canadá",         label:"P73" },
+  { id:"R32_2",  date:"2026-06-29T19:30", home:"Alemania",        away:"Paraguay",       label:"P74" },
+  { id:"R32_3",  date:"2026-06-30T02:00", home:"Países Bajos",    away:"Marruecos",      label:"P75" },
+  { id:"R32_4",  date:"2026-06-30T22:00", home:"Francia",         away:"Suecia",         label:"P77" },
+  { id:"R32_5",  date:"2026-07-01T02:00", home:"México",          away:"Ecuador",        label:"P79" },
+  { id:"R32_6",  date:"2026-07-01T20:00", home:"Inglaterra",      away:"R.D. Congo",     label:"P80" },
+  { id:"R32_7",  date:"2026-07-02T02:00", home:"USA",             away:"Bosnia",         label:"P81" },
+  { id:"R32_8",  date:"2026-07-01T22:00", home:"Bélgica",         away:"Senegal",        label:"P82" },
+  // ── LADO DERECHO ─────────────────────────────────────────────
+  { id:"R32_9",  date:"2026-06-29T16:00", home:"Brasil",          away:"Japón",          label:"P76" },
+  { id:"R32_10", date:"2026-06-30T16:00", home:"Costa de Marfil", away:"Noruega",        label:"P78" },
+  { id:"R32_11", date:"2026-07-02T22:00", home:"Portugal",        away:"Croacia",        label:"P83" },
+  { id:"R32_12", date:"2026-07-02T19:00", home:"España",          away:"Austria",        label:"P84" },
+  { id:"R32_13", date:"2026-07-03T01:00", home:"Suiza",           away:"Argelia",        label:"P85" },
+  { id:"R32_14", date:"2026-07-04T01:00", home:"Argentina",       away:"Cabo Verde",     label:"P86" },
+  { id:"R32_15", date:"2026-07-04T02:30", home:"Colombia",        away:"Ghana",          label:"P87" },
+  { id:"R32_16", date:"2026-07-03T20:00", home:"Australia",       away:"Egipto",         label:"P88" },
 ];
 const QF = [
-  { id:"QF1", date:"2026-07-17T21:00", slotA:"W_R32_1",  slotB:"W_R32_2",  label:"QF 1" },
-  { id:"QF2", date:"2026-07-18T01:00", slotA:"W_R32_3",  slotB:"W_R32_4",  label:"QF 2" },
-  { id:"QF3", date:"2026-07-18T21:00", slotA:"W_R32_5",  slotB:"W_R32_6",  label:"QF 3" },
-  { id:"QF4", date:"2026-07-19T01:00", slotA:"W_R32_7",  slotB:"W_R32_8",  label:"QF 4" },
-  { id:"QF5", date:"2026-07-19T21:00", slotA:"W_R32_9",  slotB:"W_R32_10", label:"QF 5" },
-  { id:"QF6", date:"2026-07-20T01:00", slotA:"W_R32_11", slotB:"W_R32_12", label:"QF 6" },
-  { id:"QF7", date:"2026-07-20T21:00", slotA:"W_R32_13", slotB:"W_R32_14", label:"QF 7" },
-  { id:"QF8", date:"2026-07-21T01:00", slotA:"W_R32_15", slotB:"W_R32_16", label:"QF 8" },
+  // ── DIECISEISAVOS DE FINAL ───────────────────────────────────
+  { id:"QF1", date:"2026-07-04T22:00", slotA:"W_R32_2",  slotB:"W_R32_4",  label:"P89 - Dieciseisavos" },
+  { id:"QF2", date:"2026-07-04T19:00", slotA:"W_R32_1",  slotB:"W_R32_3",  label:"P90 - Dieciseisavos" },
+  { id:"QF3", date:"2026-07-05T22:00", slotA:"W_R32_9",  slotB:"W_R32_10", label:"P91 - Dieciseisavos" },
+  { id:"QF4", date:"2026-07-06T01:00", slotA:"W_R32_5",  slotB:"W_R32_6",  label:"P92 - Dieciseisavos" },
+  { id:"QF5", date:"2026-07-05T19:00", slotA:"W_R32_11", slotB:"W_R32_12", label:"P93 - Dieciseisavos" },
+  { id:"QF6", date:"2026-07-05T22:00", slotA:"W_R32_7",  slotB:"W_R32_8",  label:"P94 - Dieciseisavos" },
+  { id:"QF7", date:"2026-07-06T18:00", slotA:"W_R32_14", slotB:"W_R32_16", label:"P95 - Dieciseisavos" },
+  { id:"QF8", date:"2026-07-07T01:00", slotA:"W_R32_13", slotB:"W_R32_15", label:"P96 - Dieciseisavos" },
 ];
 const SF = [
-  { id:"SF1", date:"2026-07-26T21:00", slotA:"W_QF1", slotB:"W_QF2", label:"Semi 1" },
-  { id:"SF2", date:"2026-07-27T01:00", slotA:"W_QF3", slotB:"W_QF4", label:"Semi 2" },
-  { id:"SF3", date:"2026-07-27T21:00", slotA:"W_QF5", slotB:"W_QF6", label:"Semi 3" },
-  { id:"SF4", date:"2026-07-28T01:00", slotA:"W_QF7", slotB:"W_QF8", label:"Semi 4" },
+  // ── CUARTOS DE FINAL ────────────────────────────────────────
+  { id:"SF1", date:"2026-07-09T22:00", slotA:"W_QF1", slotB:"W_QF2", label:"P97 - Cuartos" },
+  { id:"SF2", date:"2026-07-09T19:00", slotA:"W_QF5", slotB:"W_QF6", label:"P98 - Cuartos" },
+  { id:"SF3", date:"2026-07-10T22:00", slotA:"W_QF3", slotB:"W_QF4", label:"P99 - Cuartos" },
+  { id:"SF4", date:"2026-07-11T01:00", slotA:"W_QF7", slotB:"W_QF8", label:"P100 - Cuartos" },
 ];
 const FINALS = [
-  { id:"F3P1",  date:"2026-08-01T21:00", slotA:"L_SF1", slotB:"L_SF2", label:"3° Puesto (1)" },
-  { id:"F3P2",  date:"2026-08-01T21:00", slotA:"L_SF3", slotB:"L_SF4", label:"3° Puesto (2)" },
-  { id:"FINAL", date:"2026-08-06T21:00", slotA:"W_SF_top", slotB:"W_SF_bot", label:"🏆 GRAN FINAL" },
+  // ── SEMIFINALES ─────────────────────────────────────────────
+  { id:"SF_A",  date:"2026-07-14T22:00", slotA:"W_SF1",  slotB:"W_SF2",  label:"P101 - Semifinal" },
+  { id:"SF_B",  date:"2026-07-15T22:00", slotA:"W_SF3",  slotB:"W_SF4",  label:"P102 - Semifinal" },
+  // ── FINAL Y 3° PUESTO ───────────────────────────────────────
+  { id:"F3P1",  date:"2026-07-18T22:00", slotA:"L_SF_A", slotB:"L_SF_B", label:"P103 - 3° Puesto" },
+  { id:"FINAL", date:"2026-07-19T22:00", slotA:"W_SF_A", slotB:"W_SF_B", label:"🏆 P104 - GRAN FINAL" },
 ];
 
 const JORNADAS = [
