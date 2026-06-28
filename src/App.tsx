@@ -302,7 +302,7 @@ function allGroupMatches() {
 function allKnockoutMatches(kt) {
   const r = (s) => kt?.[s] || s;
   return [
-    ...R32.map(m=>({...m,phase:"R32",home:r(m.slotA),away:r(m.slotB)})),
+    ...R32.map(m=>({...m,phase:"R32",home:m.home,away:m.away})),
     ...QF.map(m=>({...m,phase:"QF",home:r(m.slotA),away:r(m.slotB)})),
     ...SF.map(m=>({...m,phase:"SF",home:r(m.slotA),away:r(m.slotB)})),
     ...FINALS.map(m=>({...m,phase:"F",home:r(m.slotA),away:r(m.slotB)})),
@@ -1114,7 +1114,7 @@ function FixtureTab({ user, isAdmin, state, phase, setPhase, selGrp, setSelGrp, 
       </>}
       {phase!=="groups" && (ko[phase]||[]).map(m=>(
         <MatchCard key={m.id}
-          match={{...m,home:resolve(m.slotA),away:resolve(m.slotB),hf:"⚽",af:"⚽"}}
+          match={{...m,home:m.home||resolve(m.slotA),away:m.away||resolve(m.slotB),hf:"⚽",af:"⚽"}}
           user={user} isAdmin={isAdmin} state={state} onSave={onSave} savedMap={savedMap}
           phaseLabel={m.label}
         />
