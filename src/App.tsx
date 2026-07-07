@@ -1351,10 +1351,9 @@ function BracketTab({ state, user }) {
       </p>
       {renderPhase("⚡ Treintaidosavos de Final", R32)}
       {renderPhase("🔥 Dieciseisavos de Final", QF)}
-      {renderPhase("⚡ Octavos de Final (Cuartos)", SF)}
-      {renderPhase("🔥 Cuartos de Final", SF)
+      {renderPhase("⚡ Octavos de Final", SF)}
       {renderPhase("🌟 Semifinales", SEMIS)}
-      {renderPhase("🏆 Final & 3° Puesto", FINALS)}}
+      {renderPhase("🏆 Final & 3° Puesto", FINALS)}
     </div>
   );
 }
